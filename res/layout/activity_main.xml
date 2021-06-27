@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <com.android.arijit.canvas.ocr.DrawView
+        android:id="@+id/canvas"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/ocr"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <ImageView
+        android:id="@+id/ocr"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:src="@drawable/ic_baseline_search_24"
+        app:layout_constraintEnd_toStartOf="@id/clear"
+        app:layout_constraintStart_toEndOf="@id/save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:tint="#1565C0" />
+
+    <ImageView
+        android:id="@+id/clear"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:src="@drawable/ic_baseline_clear_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ocr"
+        app:tint="#C62828"/>
+    <ImageView
+        android:id="@+id/save"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:src="@drawable/ic_baseline_save_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ocr"
+        app:layout_constraintStart_toStartOf="parent"/>
+    <include
+        android:id="@+id/ocr_result"
+        layout="@layout/layout_card"
+        android:visibility="gone"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
