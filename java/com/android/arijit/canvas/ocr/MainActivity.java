@@ -11,6 +11,8 @@ import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -19,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.slider.RangeSlider;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.mlkit.common.MlKitException;
 import com.google.mlkit.common.model.DownloadConditions;
@@ -34,10 +37,12 @@ import com.google.mlkit.vision.digitalink.RecognitionResult;
 public class MainActivity extends AppCompatActivity {
     private DrawView paint;
     private String TAG = "MainActivity";
-    private View card;
+    private View card, comSet;
     private Button ok, copy;
     private EditText etXt;
     private Animation reveal, hide;
+    private RangeSlider radiusSlider;
+    private CheckBox cb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
         etXt = ((EditText) findViewById(R.id.ocr_xt));
         reveal = AnimationUtils.loadAnimation(this, R.anim.card_reveal);
         hide = AnimationUtils.loadAnimation(this, R.anim.card_hide);
+        radiusSlider = (RangeSlider) findViewById(R.id.radius_slider);
+        radiusSlider.setValueFrom(0.0f);
+        radiusSlider.setValueTo(800.0f);
+        comSet = findViewById(R.id.compassset);
+        cb = findViewById(R.id.cb);
 
         checkDownloadLanguageData();
 
@@ -64,12 +74,27 @@ public class MainActivity extends AppCompatActivity {
                 paint.init(height, width);
             }
         });
-
+//        paint.setmMode(1);
+        (findViewById(R.id.compass)).setOnClickListener(v -> {
+            paint.setSettingCenter(null);
+            if(comSet.getVisibility() == View.GONE)
+                comSet.setVisibility(View.VISIBLE);
+            else
+                comSet.setVisibility(View.GONE);
+            cb.setChecked(false);
+            paint.setmMode(0);
+        });
         ((ImageView) findViewById(R.id.clear)).setOnClickListener(v -> {
             paint.clear();
             if(card.getVisibility()==View.VISIBLE) {
                 card.setVisibility(View.GONE);
                 card.startAnimation(hide);
+            }
+            cb.setChecked(false);
+            paint.setSettingCenter(false);
+            paint.setmMode(0);
+            if(comSet.getVisibility() == View.VISIBLE){
+                comSet.setVisibility(View.GONE);
             }
         });
 
@@ -106,23 +131,23 @@ public class MainActivity extends AppCompatActivity {
                         Log.i(TAG, "onCreate: "+e.getMessage());
                     });
 
-            DigitalInkRecognizer recognizer = DigitalInkRecognition.getClient(
-                    DigitalInkRecognizerOptions.builder(model).build());
+            DigitalInkRecognizer recognizer = DigitalInkRecognition.
+                    getClient(DigitalInkRecognizerOptions.builder(model).build());
             recognizer.recognize(paint.getInk())
-                    .addOnSuccessListener(new OnSuccessListener<RecognitionResult>() {
-                        @Override
-                        public void onSuccess(@NonNull  RecognitionResult recognitionResult) {
-                            String text = recognitionResult.getCandidates().get(0).getText();
-                            Log.i(TAG, "onSuccess: "+text);
-                            card.setVisibility(View.VISIBLE);
-                            card.startAnimation(reveal);
-                            ((EditText) findViewById(R.id.ocr_xt))
-                                    .setText(text);
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.i(TAG, "onCreate: "+e.getMessage());
-                    });
+                .addOnSuccessListener(new OnSuccessListener<RecognitionResult>() {
+                    @Override
+                    public void onSuccess(@NonNull  RecognitionResult recognitionResult) {
+                        String text = recognitionResult.getCandidates().get(0).getText();
+                        Log.i(TAG, "onSuccess: "+text);
+                        card.setVisibility(View.VISIBLE);
+                        card.startAnimation(reveal);
+                        ((EditText) findViewById(R.id.ocr_xt))
+                                .setText(text);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.i(TAG, "onCreate: "+e.getMessage());
+                });
         });
 
         ok.setOnClickListener(v -> {
@@ -136,6 +161,19 @@ public class MainActivity extends AppCompatActivity {
             Snackbar.make(v, getResources().getText(R.string.copy_message), Snackbar.LENGTH_SHORT).show();
         });
 
+        radiusSlider.addOnChangeListener(new RangeSlider.OnChangeListener() {
+            @Override
+            public void onValueChange(@NonNull RangeSlider slider, float value, boolean fromUser) {
+                paint.setmRadius(value);
+            }
+        });
+        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                paint.setmMode(isChecked?1:0);
+                paint.setSettingCenter(null);
+            }
+        });
     }
     private void copyToClipboard(String toCopy){
         ClipboardManager clipboardManager = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
