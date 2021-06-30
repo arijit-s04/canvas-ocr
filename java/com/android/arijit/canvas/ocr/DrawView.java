@@ -2,14 +2,11 @@ package com.android.arijit.canvas.ocr;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -141,7 +138,6 @@ public class DrawView extends View {
     public void clear() {
         paths.clear();
         for (Stroke fp : paths) {
-            Log.i(TAG, "clear: here");
             mPaint.setColor(fp.color);
             mPaint.setStrokeWidth(fp.strokeWidth);
             mCanvas.drawPath(fp.path, mPaint);
@@ -162,7 +158,6 @@ public class DrawView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Log.i(TAG, "onDraw: ");
         canvas.save();
 
         int backgroundColor = Color.WHITE;
@@ -233,7 +228,6 @@ public class DrawView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-        Log.i(TAG, "onTouchEvent: x y "+x+" "+y);
         long t = System.currentTimeMillis();
         if(settingCenter){
             switch (event.getAction()){
@@ -290,7 +284,6 @@ public class DrawView extends View {
         float result[] = new float[2];
         result[0] = ((mRadius*x - mRadius*cX)/modV) + cX;
         result[1] = ((mRadius*y - mRadius*cY)/modV) + cY;
-        Log.i(TAG, "getCorrespondingPoint: x y "+result[0] + " " + result[1]);
         return result;
     }
 
