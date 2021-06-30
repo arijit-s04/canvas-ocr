@@ -22,16 +22,18 @@ import java.util.ArrayList;
 public class DrawView extends View {
     private final String TAG = "DrawView";
     private static final float TOUCH_TOLERANCE = 4;
+    private static final int ARM_LENGTH = 500;
     private float mX, mY, cX, cY;
     private Path mPath;
     private Ink.Builder inkBuilder = Ink.builder();
     private Ink.Stroke.Builder strokeBuilder;
     private int mMode = 0;
-    private float mRadius = 250f;
+    private float mRadius = 0f;
     private boolean settingCenter=false;
     private Paint mPaint;
     private Path centPoint, pencil;
     private Paint cenPaint, penPaint;
+    private double comTheta = 0;
 
     private ArrayList<Stroke> paths = new ArrayList<>();
 
@@ -63,7 +65,7 @@ public class DrawView extends View {
 
         penPaint = new Paint(mPaint);
         penPaint.setColor(Color.BLUE);
-        penPaint.setStrokeWidth(5);
+        penPaint.setStrokeWidth(8);
     }
 
     public void init(int height, int width) {
@@ -73,7 +75,7 @@ public class DrawView extends View {
 
         currentColor = Color.BLACK;
 
-        strokeWidth = 20;
+        strokeWidth = 12;
     }
 
     public int getmMode() {
@@ -97,8 +99,13 @@ public class DrawView extends View {
             if (this.settingCenter) {
                 centPoint = new Path();
                 createCross(cX, cY);
-            } else if (mMode != 1) {
+                pencil = new Path();
+                float[] res = getArmPoint();
+                createPencil(res[0],res[1]);
+            }
+            else if (mMode != 1) {
                 centPoint.reset();
+                comTheta = 0;
             }
         }
         invalidate();
@@ -111,7 +118,8 @@ public class DrawView extends View {
     public void setmRadius(float mRadius) {
         this.mRadius = mRadius;
         pencil = new Path();
-        createPencil(cX+mRadius, cY);
+        float[] res = getArmPoint();
+        createPencil(res[0],res[1]);
         invalidate();
     }
 
@@ -167,8 +175,8 @@ public class DrawView extends View {
         }
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
         if(centPoint!=null && (settingCenter || mMode == 1)) {
-            mCanvas.drawPath(centPoint, cenPaint);
             mCanvas.drawPath(pencil, penPaint);
+            mCanvas.drawPath(centPoint, cenPaint);
         }
 
         canvas.restore();
@@ -198,6 +206,11 @@ public class DrawView extends View {
             mY = y;
         }
         if(mMode == 1){
+            comTheta = Math.atan((y-cY)/(x-cX));
+            //check 2nd quad o 3rd
+            if(x<cX){
+                comTheta += Math.PI;
+            }
             pencil.reset();
             createPencil(x,y);
         }
@@ -212,7 +225,8 @@ public class DrawView extends View {
         centPoint.reset();
         createCross(cX, cY);
         pencil.reset();
-        createPencil(cX+mRadius, cY);
+        float[] res = getArmPoint();
+        createPencil(res[0],res[1]);
     }
 
     @Override
@@ -303,16 +317,32 @@ public class DrawView extends View {
     }
 
     private void createPencil(float x, float y){
-        pencil.moveTo(x,y);
-        pencil.lineTo(x-40, y+60);
-        pencil.moveTo(x-40, y+60);
-        pencil.lineTo(x-40,y+250);
-        pencil.moveTo(x-40,y+250);
-        pencil.lineTo(x+40, y+250);
-        pencil.moveTo(x+40, y+250);
-        pencil.lineTo(x+40, y+60);
-        pencil.moveTo(x+40, y+60);
+//        pencil.moveTo(x,y);
+//        pencil.lineTo(x-40, y+60);
+//        pencil.moveTo(x-40, y+60);
+//        pencil.lineTo(x-40,y+250);
+//        pencil.moveTo(x-40,y+250);
+//        pencil.lineTo(x+40, y+250);
+//        pencil.moveTo(x+40, y+250);
+//        pencil.lineTo(x+40, y+60);
+//        pencil.moveTo(x+40, y+60);
+//        pencil.lineTo(x,y);
+        double h = Math.sqrt(ARM_LENGTH*ARM_LENGTH - ((mRadius*mRadius)/4));
+        double modP = Math.sqrt((y-cY)*(y-cY) + (x-cX)*(x-cX))/2;
+        double topX = ((cY-y)*h*-1)/(2*modP) + (x+cX)/2;
+        double topY = ((x-cX)*h*-1)/(2*modP) + (y+cY)/2;
+        pencil.moveTo((float) topX, (float) topY);
+        pencil.lineTo(cX, cY);
+        pencil.moveTo((float) topX, (float) topY);
         pencil.lineTo(x,y);
+    }
+
+    private float[] getArmPoint(){
+        float[] result = new float[2];
+        result[0] = (float) (cX + mRadius*Math.cos(comTheta));
+        result[1] = (float) (cY + mRadius*Math.sin(comTheta));
+
+        return result;
     }
 
 }

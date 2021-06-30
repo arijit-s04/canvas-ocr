@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         hide = AnimationUtils.loadAnimation(this, R.anim.card_hide);
         radiusSlider = (RangeSlider) findViewById(R.id.radius_slider);
         radiusSlider.setValueFrom(0.0f);
-        radiusSlider.setValueTo(800.0f);
+        radiusSlider.setValueTo(1000.f);
         comSet = findViewById(R.id.compassset);
         cb = findViewById(R.id.cb);
 
