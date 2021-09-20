@@ -14,6 +14,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_expand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="EXPAND"
+        app:layout_constraintBottom_toBottomOf="@+id/canvas" />
+
+
     <ImageView
         android:id="@+id/ocr"
         android:layout_width="@dimen/iv_size"
@@ -88,6 +98,29 @@
             app:layout_constraintBottom_toBottomOf="parent"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/top_sheet_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:id="@+id/top_sheet"
+            android:layout_width="match_parent"
+            android:layout_height="600dp"
+            android:background="#FF0000"
+            app:behavior_peekHeight="250dp"
+            app:layout_behavior="@string/top_sheet_behavior">
+
+            <com.android.arijit.canvas.ocr.DrawView
+                android:id="@+id/top_sheet_draw"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+
+        </FrameLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <include
         android:layout_width="0dp"

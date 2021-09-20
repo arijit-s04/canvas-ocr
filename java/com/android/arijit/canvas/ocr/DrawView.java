@@ -16,7 +16,7 @@ import com.google.mlkit.vision.digitalink.Ink;
 
 import java.util.ArrayList;
 
-public class DrawView extends View {
+public class DrawView extends View implements OnCompassDraw {
     private final String TAG = "DrawView";
     private static final float TOUCH_TOLERANCE = 4;
     private static final int ARM_LENGTH = 500;
@@ -202,7 +202,7 @@ public class DrawView extends View {
         }
         if(mMode == 1){
             comTheta = Math.atan((y-cY)/(x-cX));
-            //check 2nd quad o 3rd
+            //check 2nd quad or 3rd
             if(x<cX){
                 comTheta += Math.PI;
             }
@@ -281,7 +281,7 @@ public class DrawView extends View {
 
     private float[] getCorrespondingPoint(float x, float y){
         float modV = (float) Math.sqrt(((x-cX)*(x-cX) + (y-cY)*(y-cY)));
-        float result[] = new float[2];
+        float[] result = new float[2];
         result[0] = ((mRadius*x - mRadius*cX)/modV) + cX;
         result[1] = ((mRadius*y - mRadius*cY)/modV) + cY;
         return result;
@@ -338,4 +338,21 @@ public class DrawView extends View {
         return result;
     }
 
+    @Override
+    public void onCompassDrawStart(float x, float y) {
+        touchStart(x, y);
+        invalidate();
+    }
+
+    @Override
+    public void onCompassDrawMove(float x, float y) {
+        touchMove(x, y);
+        invalidate();
+    }
+
+    @Override
+    public void onCompassDrawUp(float x, float y) {
+        touchUp();
+        invalidate();
+    }
 }

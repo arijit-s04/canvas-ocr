@@ -19,7 +19,10 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.android.arijit.canvas.ocr.topsheet.TopSheetBehavior;
+import com.android.arijit.canvas.ocr.topsheet.TopSheetDialog;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.slider.RangeSlider;
 import com.google.android.material.snackbar.Snackbar;
@@ -64,6 +67,18 @@ public class MainActivity extends AppCompatActivity {
 
         checkDownloadLanguageData();
 
+//        CompassView compassView = new CompassView(this);
+//        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(CompassView.WIDTH, CompassView.HEIGHT);
+//        addContentView(compassView, layoutParams);
+//        LayoutInflater.from(this).inflate(R.layout.layout_slider, paint);
+        TotalView totalView = new TotalView(this, paint);
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(TotalView.WIDTH, TotalView.HEIGHT);
+        layoutParams.topToTop=R.id.parent;
+        layoutParams.bottomToBottom=R.id.parent;
+        layoutParams.startToStart = layoutParams.endToEnd = R.id.parent;
+        addContentView(totalView, layoutParams);
+//        CompassView.PX = totalView.getX();
+//        CompassView.PY = totalView.getY();
         ViewTreeObserver vto = paint.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -74,7 +89,20 @@ public class MainActivity extends AppCompatActivity {
                 paint.init(height, width);
             }
         });
-//        paint.setmMode(1);
+        paint.setmMode(1);
+        DrawView tmp = findViewById(R.id.top_sheet_draw);
+        vto = tmp.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                tmp.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                int width = tmp.getMeasuredWidth();
+                int height = tmp.getMeasuredHeight();
+                tmp.init(height, width);
+                (findViewById(R.id.top_sheet_container)).setVisibility(View.GONE);
+            }
+        });
+
         (findViewById(R.id.compass)).setOnClickListener(v -> {
             paint.setSettingCenter(null);
             if(comSet.getVisibility() == View.GONE)
@@ -167,14 +195,45 @@ public class MainActivity extends AppCompatActivity {
                 paint.setmRadius(value);
             }
         });
-        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        cb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            paint.setmMode(isChecked?1:0);
+            paint.setSettingCenter(null);
+        });
+
+        (findViewById(R.id.btn_expand)).setOnClickListener(v -> openTopSheet());
+    }
+
+    private void openTopSheet(){
+        (findViewById(R.id.top_sheet_container)).setVisibility(View.VISIBLE);
+        View sheet = findViewById(R.id.top_sheet);
+        TopSheetBehavior tt = TopSheetBehavior.from(sheet);
+        tt.setHideable(true);
+        tt.setState(TopSheetBehavior.STATE_COLLAPSED);
+        tt.setTopSheetCallback(new TopSheetBehavior.TopSheetCallback() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                paint.setmMode(isChecked?1:0);
-                paint.setSettingCenter(null);
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                Log.d("TAG", "newState: " + newState);
+                if(newState == TopSheetBehavior.STATE_HIDDEN) {
+                    (findViewById(R.id.top_sheet_container)).setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset, Boolean isOpening) {
+                Log.d("TAG", "slideOffset: " + slideOffset);
+                if (isOpening != null) {
+                    Log.d("TAG", "isOpening: " + isOpening);
+                }
             }
         });
     }
+
+    private void openTopSheetDialog() {
+        TopSheetDialog dialog = new TopSheetDialog(this);
+        dialog.setContentView(R.layout.sheet_content);
+        dialog.show();
+    }
+
     private void copyToClipboard(String toCopy){
         ClipboardManager clipboardManager = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
         String clip = toCopy;
